@@ -105,17 +105,64 @@ The Docker Compose file sets up two services:
 
 This file lists all Python dependencies required for the application.
 
+Sure, here is the revised Step-by-Step Guide:
+
 ## Step-by-Step Guide
 
-### Step 1: Build Docker Image
+### Step 1: Build the Docker Image
 
-Open your terminal, navigate to the project directory, and run:
+Open your terminal, navigate to the project directory, and run the following command to build the Docker image for the Python application:
 
 ```sh
 docker build -t python-app .
+```
 
+### Step 2: Start Docker Services
 
-**Troubleshooting**
-    -No credentials error: Ensure your AWS CLI is properly configured and LocalStack is running.
-    -Queue does not exist: Make sure the queue was created successfully using create_queue.py.
-    -Database insertion issues: Ensure the PostgreSQL container is running and accessible.
+Use Docker Compose to start the necessary services (LocalStack and PostgreSQL). Run the following command:
+
+```sh
+docker-compose up -d
+```
+
+The `-d` flag runs the services in the background.
+
+### Step 3: Create the SQS Queue
+
+After the services are up, create the SQS queue by running the following command:
+
+```sh
+docker run --network host python-app python create_queue.py
+```
+
+### Step 4: Send Messages to SQS
+
+You can manually send messages to the SQS queue using the AWS CLI or any other method. Ensure that each message is formatted as follows:
+
+```json
+{
+    "user_id": "201",
+    "device_id": "mno",
+    "ip": "192.168.1.11",
+    "device_type": "mobile",
+    "locale": "en_US",
+    "app_version": 1,
+    "create_date": "2023-06-11"
+}
+```
+
+### Step 5: Read from SQS and Insert into PostgreSQL
+
+Read messages from the SQS queue, process them, and insert them into the PostgreSQL database by running the following command:
+
+```sh
+docker run --network host python-app python read_sqs.py
+```
+
+This command will execute the `read_sqs.py` script, which reads messages from the queue, processes the data, and inserts it into the PostgreSQL database.
+
+## Troubleshooting
+
+- **No credentials error**: Ensure that your AWS CLI is properly configured and that LocalStack is running.
+- **Queue does not exist**: Make sure that the queue was created successfully using `create_queue.py`.
+- **Database insertion issues**: Ensure that the PostgreSQL container is running and accessible.
